@@ -1,11 +1,26 @@
+import atexit
+import json
+import urllib
+
 from flask import (
     Flask,
     render_template,
     request,
     jsonify
 )
-import datetime
+import datetime, time
 import csv
+from apscheduler.schedulers.background import BackgroundScheduler
+import logging
+
+log = logging.getLogger('apscheduler.executors.default')
+log.setLevel(logging.INFO)  # DEBUG
+
+fmt = logging.Formatter('%(levelname)s:%(name)s:%(message)s')
+h = logging.StreamHandler()
+h.setFormatter(fmt)
+log.addHandler(h)
+
 
 
 # Create the application instance
@@ -138,6 +153,67 @@ def get_resuts_by_date(date):
         return {"date": date, "bullCount": bullCount, "bearCount": bearCount}
 
 
+# for job scheduling
+scheduler = BackgroundScheduler()
+
+
+# run this after market hours
+def job():
+    print("Fetching...")
+
+    todays_date = str(datetime.datetime.now())[0:10]
+
+    url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=SPY&apikey=D0PCK93T14WWG2I0"
+
+    contents = urllib.urlopen(url).read()
+
+    time.sleep(0.1)
+
+    parsed = json.loads(contents)
+
+    time.sleep(0.1)
+
+    parsed = parsed["Time Series (Daily)"]
+
+    offset = 0
+
+    """
+    while not parsed.has_key(todays_date):
+        offset += 1
+        todays_date = str(datetime.datetime.now() - datetime.timedelta(days=offset))[0:10]
+        print(todays_date)
+    """
+
+    if parsed.has_key(todays_date):
+        data = parsed[todays_date]
+
+        open = data["1. open"]
+        close = data["4. close"]
+        pct = str(float(close) / float(open) - 1)
+
+        fdate = (datetime.datetime.now() - datetime.timedelta(days=offset)).strftime("%x")
+
+        mkt_data = str(fdate) + "," + str(pct)
+
+    else:
+        mkt_data = datetime.datetime.now().strftime("%x") + "," + "0.00"
+
+    print(mkt_data)
+    # append to csv
+    f = file('market_data.csv', 'a')
+    f.write(mkt_data + '\n')
+
+    # repeat in 24 hours
+    scheduler.add_job(func=job, trigger="date",
+                                        run_date=datetime.datetime.now() + datetime.timedelta(days=1, seconds=-0.2))
+
+
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
-    app.run(debug=True)
+    scheduler.add_job(func=job, trigger="date", run_date = datetime.datetime.now())
+    scheduler.start()
+
+    app.run(debug=False)
+
+    # Shut down the scheduler when exiting the app
+    atexit.register(lambda: scheduler.shutdown())
