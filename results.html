@@ -10,6 +10,10 @@
         #table {
              font: 24px/1 'Open Sans', sans-serif;
         }
+        #wsb_data{
+            font: 24px/1 'Open Sans', sans-serif;
+        }
+
     </style>
 
 
@@ -18,18 +22,50 @@
     datesList = null;
     jsonData = null;
 
-        // fetch all polling data
-        $.get( "/getall" , function( data ) {
-                data = JSON.stringify(data);
-                data = (JSON.parse(data));
-                datesList = data["dates"];
-                for (var i = 0; i < data["dates"].length; i++) {
-                    datesList.push(data["dates"][i]);
-                }
-                jsonData = data["data"];
+    // fetch all polling data
+    $.get( "/getall" , function( data ) {
+            data = JSON.stringify(data);
+            data = (JSON.parse(data));
+            datesList = data["dates"];
+            jsonData = data["data"];
+            dataLoaded();
             });
-    alert(datesList[0]);
-    alert(jsonData[datesList[0]]);
+
+    function dataLoaded() {
+        // alert(datesList[0]);
+        // alert(jsonData[0]["bullCount"]);
+
+        var tbl = document.getElementById('wsb_data');
+        tbl.style.width = '100%';
+        tbl.setAttribute('border', '1');
+        var tbdy = document.createElement('tbody');
+
+        for (var i = 0; i < datesList.length; i++) {
+
+            var tr = document.createElement('tr');
+
+            var dateCell = document.createElement('td');
+            var bulls = document.createElement('td');
+            var bears = document.createElement('td');
+            var ratio = document.createElement('td');
+            var market = document.createElement('td');
+
+            dateCell.appendChild(document.createTextNode(datesList[i]));
+            bulls.appendChild(document.createTextNode(jsonData[i]["bullCount"]));
+            bears.appendChild(document.createTextNode(jsonData[i]["bearCount"]));
+            ratio.appendChild(document.createTextNode(100*parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])) + "%"));
+            market.appendChild(document.createTextNode("n/a"));
+
+            tr.appendChild(dateCell);
+            tr.appendChild(bulls);
+            tr.appendChild(bears);
+            tr.appendChild(ratio);
+            tr.appendChild(market);
+
+            tbdy.appendChild(tr);
+        }
+        tbl.appendChild(tbdy);
+    }
     </script>
 </head>
 <body>
@@ -37,9 +73,11 @@
     <div id="header">
         Results:
     </div>
-    <div id="table">
-
-    </div>
+    <p>
+    <table id="wsb_data" max-width=50%>
+    <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>% Bullish</td><td>Market Return</td></tr>
+    </table>
+    </p>
 </center>
 </body>
 </html>
