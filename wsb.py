@@ -190,9 +190,9 @@ def job():
     if todays_date in parsed:
         data = parsed[todays_date]
 
-        open = data["1. open"]
+        mktopen = data["1. open"]
         close = data["4. close"]
-        pct = str(float(close) / float(open) - 1)
+        pct = str(float(close) / float(mktopen) - 1)
 
         fdate = (datetime.datetime.now() - datetime.timedelta(days=offset)).strftime("%x")
 
@@ -203,7 +203,7 @@ def job():
 
     print(mkt_data)
     # append to csv
-    f = file('market_data.csv', 'a')
+    f = open('market_data.csv', 'a')
     f.write(mkt_data + '\n')
 
     # repeat in 24 hours
