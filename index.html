@@ -10,7 +10,7 @@
     // quick and dirty redirect
     if (location.protocol != 'https:')
     {
-            location.href = 'https:' + window.location.href.substring(windo$
+        location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
 
     var myip = 0;
