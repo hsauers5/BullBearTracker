@@ -1,6 +1,6 @@
 import atexit
 import json
-import urllib
+import urllib.request
 
 from flask import (
     Flask,
@@ -175,7 +175,7 @@ def job():
 
     url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=SPY&apikey=D0PCK93T14WWG2I0"
 
-    contents = urllib.urlopen(url).read()
+    contents = urllib.request.urlopen(url).read()
 
     time.sleep(0.1)
 
