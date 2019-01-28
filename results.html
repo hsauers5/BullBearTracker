@@ -21,6 +21,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
     <script>
+    // quick and dirty redirect
+    if (location.protocol != 'https:')
+    {
+            location.href = 'https:' + window.location.href.substring(windo$
+    }
+
     datesList = null;
     jsonData = null;
 

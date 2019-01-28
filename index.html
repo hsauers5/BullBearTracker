@@ -7,10 +7,16 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
     <script type="application/javascript">
-      var myip = 0;
-      function getIP(json) {
+    // quick and dirty redirect
+    if (location.protocol != 'https:')
+    {
+            location.href = 'https:' + window.location.href.substring(windo$
+    }
+
+    var myip = 0;
+    function getIP(json) {
         myip = json.ip;
-      }
+    }
     </script>
     <script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
 

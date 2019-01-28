@@ -119,13 +119,13 @@ def has_voted(ip):
         date = datetime.datetime.now().strftime("%x")
 
         for row in csv_reader:
-            if votes.has_key(row[0]):
+            if row[0] in votes:
                 votes[str(row[0])].append(row[1])
             else:
                 votes[str(row[0])] = [row[1]]
 
         # print(votes)
-        if votes.has_key(date):
+        if date in votes:
             for my_ip in votes[date]:
                 if my_ip == ip:
                     return True
@@ -187,7 +187,7 @@ def job():
 
     offset = 1
 
-    if parsed.has_key(todays_date):
+    if todays_date in parsed:
         data = parsed[todays_date]
 
         open = data["1. open"]
