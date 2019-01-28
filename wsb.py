@@ -86,6 +86,12 @@ def poll():
     return render_template('results.html')
 
 
+# fetches market data @TODO
+def fetch_market_data():
+
+    pass
+
+
 # checks if vote has been made
 def has_voted(ip):
 
