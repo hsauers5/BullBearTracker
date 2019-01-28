@@ -216,7 +216,7 @@ if __name__ == '__main__':
     scheduler.add_job(func=job, trigger="date", run_date = datetime.datetime.now())
     scheduler.start()
 
-    app.run(debug=False)
+    app.run(debug=False, host='0.0.0.0')
 
     # Shut down the scheduler when exiting the app
     atexit.register(lambda: scheduler.shutdown())

@@ -25,6 +25,9 @@
 
     mktData = null;
 
+    chartPoll = [] // format as [[date, value], []]
+    chartMkt = [] // format as [[date, % change], []]
+
     // fetch market data here?
     $.get( "/market" , function( data ) {
             data = JSON.stringify(data);
@@ -46,7 +49,7 @@
         // alert(jsonData[0]["bullCount"]);
 
         var tbl = document.getElementById('wsb_data');
-        tbl.style.width = '100%';
+        // tbl.style.width = '100%';
         tbl.setAttribute('border', '1');
         var tbdy = document.createElement('tbody');
 
@@ -63,12 +66,15 @@
             dateCell.appendChild(document.createTextNode(datesList[i]));
             bulls.appendChild(document.createTextNode(jsonData[i]["bullCount"]));
             bears.appendChild(document.createTextNode(jsonData[i]["bearCount"]));
-            ratio.appendChild(document.createTextNode(100*parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])) + "%"));
+            ratio.appendChild(document.createTextNode(100*parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"]))-50 + "%"));
 
-            if (i < datesList.length - 1)
+            if (i < datesList.length - 1) {
                 market.appendChild(document.createTextNode(mktData[datesList[i]]));
-            else
+                chartPoll.push({x: new Date(datesList[i]), y:100*parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])) });
+                chartMkt.push({x: new Date(datesList[i]), y:mktData[datesList[i]]*100 });
+            } else {
                 market.appendChild(document.createTextNode("N/A"));
+            }
 
             tr.appendChild(dateCell);
             tr.appendChild(bulls);
@@ -79,19 +85,90 @@
             tbdy.appendChild(tr);
         }
         tbl.appendChild(tbdy);
+
+        makeChart();
     }
+
+    function makeChart() {
+        var chart = new CanvasJS.Chart("chartContainer", {
+            title: {
+                text: "WSB vs the Market"
+            },
+            axisX: {
+                valueFormatString: "MMM DD YYYY"
+            },
+            axisY2:[
+                {
+                    title: " % Return",
+                },
+                {
+                    title: " WSB Sentiment",
+                }
+            ],
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                verticalAlign: "top",
+                horizontalAlign: "center",
+                dockInsidePlotArea: true,
+                itemclick: toogleDataSeries
+            },
+            data: [{
+                axisYIndex:1,
+                type:"line",
+                axisYType: "secondary",
+                name: "r/WallStreetBets",
+                showInLegend: true,
+                markerSize: 0,
+                dataPoints: chartPoll
+            },
+            {
+                axisYIndex:0,
+                type: "line",
+                axisYType: "secondary",
+                name: "S&P 500 Daily % Return",
+                showInLegend: true,
+                markerSize: 0,
+                dataPoints: chartMkt
+            }]
+        });
+        chart.render();
+    }
+
+    function toogleDataSeries(e){
+        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+            e.dataSeries.visible = false;
+        } else{
+            e.dataSeries.visible = true;
+        }
+        chart.render();
+    }
+
+
     </script>
 </head>
 <body>
 <center>
+
     <div id="header">
         Results:
     </div>
+
     <p>
-    <table id="wsb_data" max-width=50%>
-    <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>% Bullish</td><td>Market Return (Following Day)</td></tr>
+    <div id="mytable" style="margin:auto, overflow-x:auto">
+    <table id="wsb_data">
+    <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>Net % Bullish</td><td>Market Return (Following Day)</td></tr>
     </table>
+    </div>
     </p>
+
+    <p>
+    <div id="chartContainer" style="height: 50%; width: 75%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    </p>
+
 </center>
 </body>
 </html>
