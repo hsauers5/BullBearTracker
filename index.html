@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WSB BullBear Tracker</title>
+    <link rel="icon" href="https://ih0.redbubble.net/image.379601684.6062/raf,360x360,075,t,fafafa:ca443f4786.png">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
+    <script type="application/javascript">
+      var myip = 0;
+      function getIP(json) {
+        myip = json.ip;
+      }
+    </script>
+    <script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+
+    <script>
+        function checkIP() {
+            var ip = myip;
+
+            var hasVoted = false;
+
+            // use python api to validate
+            $.post( "/voted" + "?ip=" + ip, function( data ) {
+                if(data == "True") {
+                    hasVoted = true;
+                    document.location.href="/results";
+                }
+            });
+
+            if (hasVoted) {
+                document.location.href="/results";
+            }
+        }
+
+        function submit() {
+            var ip = myip;
+            var vote = "";
+
+            if (document.getElementById("radio-one").checked) {
+                vote = "bull";
+            } else {
+                vote = "bear";
+            }
+
+            // post to python api
+            $.post( "/poll" + "?answer=" + vote + "&ip=" + ip, function( data ) {
+                document.location.href="/results";
+            });
+        }
+
+        checkIP();
+    </script>
+
+    <style>
+        .form-radio
+        {
+             -webkit-appearance: none;
+             -moz-appearance: none;
+             appearance: none;
+             display: inline-block;
+             position: relative;
+             background-color: #f1f1f1;
+             color: #666;
+             top: 10px;
+             height: 30px;
+             width: 30px;
+             border: 0;
+             border-radius: 50px;
+             cursor: pointer;
+             margin-right: 7px;
+             outline: none;
+        }
+        .form-radio:checked::before
+        {
+             position: absolute;
+             font: 13px/1 'Open Sans', sans-serif;
+             left: 11px;
+             top: 7px;
+             transform: rotate(40deg);
+        }
+        #radio-one:hover
+        {
+             background-color: #90EE90;
+        }
+        #radio-one:checked
+        {
+             background-color: #90EE90;
+        }
+        #radio-two:hover
+        {
+             background-color: #FFA07A;
+        }
+        #radio-two:checked
+        {
+             background-color: #FFA07A;
+        }
+        label
+        {
+             font: 300 16px/1.7 'Open Sans', sans-serif;
+             color: #666;
+             cursor: pointer;
+        }
+        #header {
+             font: 24px/1 'Open Sans', sans-serif;
+        }
+    </style>
+
+</head>
+<body>
+<center>
+    <div id="header">
+        Click to vote:
+    </div>
+    <div id="poll">
+    <div class="container">
+
+        <input type="radio" name="demo" value="bull" id="radio-one" class="form-radio" ><label for="radio-one">Bullish</label>
+        <input type="radio" name="demo" value="bear" id="radio-two" class="form-radio" ><label for="radio-two">Bearish</label>
+        <p>
+        <button class="submitbtn" onclick="submit()">Submit</button>
+        </p>
+    </div>
+    </div>
+</center>
+</body>
+</html>

@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WSB BullBear Tracker</title>
+    <style>
+        #header {
+             font: 24px/1 'Open Sans', sans-serif;
+        }
+        #table {
+             font: 24px/1 'Open Sans', sans-serif;
+        }
+    </style>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
+    <script>
+    datesList = null;
+    jsonData = null;
+
+        // fetch all polling data
+        $.get( "/getall" , function( data ) {
+                data = JSON.stringify(data);
+                data = (JSON.parse(data));
+                datesList = data["dates"];
+                for (var i = 0; i < data["dates"].length; i++) {
+                    datesList.push(data["dates"][i]);
+                }
+                jsonData = data["data"];
+            });
+    alert(datesList[0]);
+    alert(jsonData[datesList[0]]);
+    </script>
+</head>
+<body>
+<center>
+    <div id="header">
+        Results:
+    </div>
+    <div id="table">
+
+    </div>
+</center>
+</body>
+</html>
