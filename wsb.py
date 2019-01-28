@@ -101,10 +101,10 @@ def poll():
     return render_template('results.html')
 
 
-# fetches market data @TODO
-def fetch_market_data():
-
-    pass
+@app.route('/market', methods=['GET'])
+def market():
+    mkt_data = get_market_data()
+    return jsonify(mkt_data)
 
 
 # checks if vote has been made
@@ -153,6 +153,16 @@ def get_resuts_by_date(date):
         return {"date": date, "bullCount": bullCount, "bearCount": bearCount}
 
 
+def get_market_data():
+    quotes = {}
+    csv_name = "market_data.csv"
+    with open(csv_name) as csv_file:
+        csv_reader = csv.reader(csv_file, delimiter=',')
+        for row in csv_reader:
+            quotes[row[0]] = row[1]
+    return quotes
+
+
 # for job scheduling
 scheduler = BackgroundScheduler()
 
@@ -175,14 +185,7 @@ def job():
 
     parsed = parsed["Time Series (Daily)"]
 
-    offset = 0
-
-    """
-    while not parsed.has_key(todays_date):
-        offset += 1
-        todays_date = str(datetime.datetime.now() - datetime.timedelta(days=offset))[0:10]
-        print(todays_date)
-    """
+    offset = 1
 
     if parsed.has_key(todays_date):
         data = parsed[todays_date]
