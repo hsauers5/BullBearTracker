@@ -22,6 +22,10 @@
     datesList = null;
     jsonData = null;
 
+    mkturl = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=SPY&apikey=D0PCK93T14WWG2I0";
+
+    // fetch market data here?
+
     // fetch all polling data
     $.get( "/getall" , function( data ) {
             data = JSON.stringify(data);
