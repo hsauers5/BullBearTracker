@@ -2,14 +2,13 @@ import atexit
 import json
 import urllib.request
 
-import status as status
 from flask import (
     Flask,
     render_template,
     request,
     jsonify
 )
-from flask_api import status as st
+from flask_api import status
 import datetime, time
 import csv
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -94,7 +93,7 @@ def poll():
     ip = request.args['ip']
 
     if len(ip) > 15 or len(vote) > 4:
-        return st.HTTP_400_BAD_REQUEST
+        return status.HTTP_400_BAD_REQUEST
 
     date = datetime.datetime.now().strftime("%x")
 
