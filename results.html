@@ -70,10 +70,14 @@
             var ratio = document.createElement('td');
             var market = document.createElement('td');
 
+            var bullCount = jsonData[i]["bullCount"];
+            var bearCount = jsonData[i]["bearCount"];
+            var netBulls = 100*(parseFloat(bullCount)-parseFloat(bearCount))/(parseFloat(bearCount)+parseFloat(bullCount));
+
             dateCell.appendChild(document.createTextNode(datesList[i]));
-            bulls.appendChild(document.createTextNode(jsonData[i]["bullCount"]));
-            bears.appendChild(document.createTextNode(jsonData[i]["bearCount"]));
-            ratio.appendChild(document.createTextNode(100*parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"]))-50 + "%"));
+            bulls.appendChild(document.createTextNode(bullCount));
+            bears.appendChild(document.createTextNode(bearCount));
+            ratio.appendChild(document.createTextNode(netBulls + "%"));
 
             if (i < datesList.length - 1) {
                 market.appendChild(document.createTextNode(mktData[datesList[i]]));
