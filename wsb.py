@@ -2,12 +2,14 @@ import atexit
 import json
 import urllib.request
 
+import status as status
 from flask import (
     Flask,
     render_template,
     request,
     jsonify
 )
+from flask_api import status as st
 import datetime, time
 import csv
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -90,6 +92,10 @@ def voted():
 def poll():
     vote = request.args['answer']
     ip = request.args['ip']
+
+    if len(ip) > 15 or len(vote) > 4:
+        return st.HTTP_400_BAD_REQUEST
+
     date = datetime.datetime.now().strftime("%x")
 
     # ensure client hasn't voted yet
@@ -173,7 +179,10 @@ def job():
 
     todays_date = str(datetime.datetime.now())[0:10]
 
-    url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=SPY&apikey=D0PCK93T14WWG2I0"
+    apiKey = ""
+    with open("creds.txt") as creds:
+        apiKey = creds.read().replace("\n", '')
+    url = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY_ADJUSTED&symbol=SPY&apikey=" + apiKey
 
     contents = urllib.request.urlopen(url).read()
 
