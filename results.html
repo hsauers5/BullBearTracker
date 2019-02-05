@@ -80,7 +80,7 @@
             ratio.appendChild(document.createTextNode(netBulls + "%"));
 
             if (i < datesList.length - 1) {
-                if (mktData[datesList[i]]) != "undefined") {
+                if (mktData[datesList[i]]).toString() != "undefined") {
                     market.appendChild(document.createTextNode(mktData[datesList[i]]));
                 }
                 chartPoll.push({x: new Date(datesList[i]), y:(100*(parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])))-50)/100 });
