@@ -200,7 +200,7 @@ def job():
         close = data["4. close"]
         pct = str(float(close) / float(mktopen) - 1)
 
-        fdate = (datetime.datetime.now() - datetime.timedelta(days=offset)).strftime("%m/%d/%Y")
+        fdate = (datetime.datetime.now()).strftime("%m/%d/%Y")
 
         mkt_data = str(fdate) + "," + str(pct)
 
