@@ -175,8 +175,7 @@ scheduler = BackgroundScheduler()
 def job():
     print("Fetching...")
 
-    todays_date = get_todays_date()
-
+    todays_date = str(datetime.datetime.now())[:10]
     apiKey = ""
     with open("creds.txt") as creds:
         apiKey = creds.read().replace("\n", '')
@@ -206,7 +205,7 @@ def job():
         mkt_data = str(fdate) + "," + str(pct)
 
     else:
-        mkt_data = todays_date + "," + "N/A"
+        mkt_data = get_todays_date() + "," + "N/A"
 
     print(mkt_data)
     # append to csv
