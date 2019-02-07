@@ -22,8 +22,6 @@ h = logging.StreamHandler()
 h.setFormatter(fmt)
 log.addHandler(h)
 
-
-
 # Create the application instance
 app = Flask(__name__, template_folder="")
 
@@ -47,7 +45,8 @@ def results():
 @app.route('/today', methods=['POST', 'GET'])
 def today():
     # return today's voting results
-    return jsonify(get_resuts_by_date(datetime.datetime.now().strftime("%x")))
+    date = get_todays_date()
+    return jsonify(get_resuts_by_date(date))
 
 
 @app.route('/getresults', methods=['POST', 'GET'])
@@ -95,7 +94,7 @@ def poll():
     if len(ip) > 15 or len(vote) > 4:
         return status.HTTP_400_BAD_REQUEST
 
-    date = datetime.datetime.now().strftime("%x")
+    date = get_todays_date()
 
     # ensure client hasn't voted yet
     if not has_voted(ip):
@@ -121,7 +120,7 @@ def has_voted(ip):
     with open(csv_name) as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         line_count = 0
-        date = datetime.datetime.now().strftime("%x")
+        date = get_todays_date()
 
         for row in csv_reader:
             if row[0] in votes:
@@ -176,7 +175,7 @@ scheduler = BackgroundScheduler()
 def job():
     print("Fetching...")
 
-    todays_date = str(datetime.datetime.now())[0:10]
+    todays_date = get_todays_date()
 
     apiKey = ""
     with open("creds.txt") as creds:
@@ -207,7 +206,7 @@ def job():
         mkt_data = str(fdate) + "," + str(pct)
 
     else:
-        mkt_data = datetime.datetime.now().strftime("%x") + "," + "N/A"
+        mkt_data = todays_date + "," + "N/A"
 
     print(mkt_data)
     # append to csv
@@ -219,8 +218,17 @@ def job():
                                         run_date=datetime.datetime.now() + datetime.timedelta(days=1, seconds=-0.2))
 
 
+def get_todays_date():
+    date_url = "http://worldclockapi.com/api/json/est/now"
+    contents = json.loads(urllib.request.urlopen(date_url).read())
+    date = contents['currentDateTime'][:10]
+    date = datetime.datetime.strptime(date, "%Y-%m-%d").strftime("%m/%d/%Y")
+    return date
+
+
 # If we're running in stand alone mode, run the application
 if __name__ == '__main__':
+    print(get_todays_date())
     scheduler.add_job(func=job, trigger="date", run_date = datetime.datetime.now())
     scheduler.start()
 
