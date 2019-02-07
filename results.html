@@ -80,7 +80,7 @@
             ratio.appendChild(document.createTextNode(netBulls + "%"));
 
             if (i < datesList.length - 1) {
-                if (mktData[datesList[i]]).toString() != "undefined") {
+                if (mktData[datesList[i]].toString() != "") {
                     market.appendChild(document.createTextNode(mktData[datesList[i]]));
                 }
                 chartPoll.push({x: new Date(datesList[i]), y:(100*(parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])))-50)/100 });
@@ -172,16 +172,16 @@
     </div>
 
     <p>
+    <div id="chartContainer" style="height: 50%; width: 75%;"></div>
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+    </p>
+
+    <p>
     <div id="mytable" style="margin:auto, overflow-x:auto">
     <table id="wsb_data">
     <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>Net % Bullish</td><td>Market Return (Following Day)</td></tr>
     </table>
     </div>
-    </p>
-
-    <p>
-    <div id="chartContainer" style="height: 50%; width: 75%;"></div>
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     </p>
 
 </center>
