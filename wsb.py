@@ -207,7 +207,7 @@ def job():
         mkt_data = str(fdate) + "," + str(pct)
 
     else:
-        mkt_data = datetime.datetime.now().strftime("%x") + "," + "0.00"
+        mkt_data = datetime.datetime.now().strftime("%x") + "," + "N/A"
 
     print(mkt_data)
     # append to csv
