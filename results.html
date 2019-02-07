@@ -83,7 +83,7 @@
             netBulls /= 100;
 
             if (i < datesList.length - 1) {
-                market.appendChild(document.createTextNode(mktData[datesList[i+1]]));
+                market.appendChild(document.createTextNode(mktData[datesList[i+1]]*100 + "%"));
                 chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
                 chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
             } else {
