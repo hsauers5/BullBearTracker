@@ -80,9 +80,7 @@
             ratio.appendChild(document.createTextNode(netBulls + "%"));
 
             if (i < datesList.length - 1) {
-                if (mktData[datesList[i]].toString() != "") {
-                    market.appendChild(document.createTextNode(mktData[datesList[i]]));
-                }
+                market.appendChild(document.createTextNode(mktData[datesList[i]]));
                 chartPoll.push({x: new Date(datesList[i]), y:(100*(parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])))-50)/100 });
                 chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i]])/100 });
             } else {
