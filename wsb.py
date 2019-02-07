@@ -193,12 +193,22 @@ def job():
 
     offset = 1
 
+    previous_date = str(datetime.datetime.now() - datetime.timedelta(days=1))[:10]
+    previous_offset = 1
+
+    while previous_date not in parsed:
+        previous_offset += 1
+        previous_date = str(datetime.datetime.now() - datetime.timedelta(days=previous_offset))[:10]
+
+    previous_close = 0
+
     if todays_date in parsed:
         data = parsed[todays_date]
+        previous_close = parsed[previous_date]["4. close"]
 
         mktopen = data["1. open"]
         close = data["4. close"]
-        pct = str(float(close) / float(mktopen) - 1)
+        pct = str(float(close) / float(previous_close) - 1)
 
         fdate = (datetime.datetime.now()).strftime("%m/%d/%Y")
 
