@@ -21,13 +21,12 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
     <script>
-    /*
+
     // quick and dirty redirect
     if (location.protocol != 'https:')
     {
         location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
-    */
 
     datesList = null;
     jsonData = null;
@@ -81,13 +80,15 @@
             bears.appendChild(document.createTextNode(bearCount));
             ratio.appendChild(document.createTextNode(netBulls + "%"));
 
+            netBulls /= 100;
+
             if (i < datesList.length - 1) {
                 market.appendChild(document.createTextNode(mktData[datesList[i+1]]));
-                chartPoll.push({x: new Date(datesList[i]), y:(100*(parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])))-50)/100 });
+                chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
                 chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
             } else {
                 market.appendChild(document.createTextNode("N/A"));
-                chartPoll.push({x: new Date(datesList[i]), y:(100*(parseFloat(jsonData[i]["bullCount"])/(parseFloat(jsonData[i]["bearCount"])+parseFloat(jsonData[i]["bullCount"])))-50)/100 });
+                chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
             }
 
             tr.appendChild(dateCell);
