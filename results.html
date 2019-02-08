@@ -22,8 +22,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
     <script>
 
-    // quick and dirty redirect
-    if (location.protocol != 'https:')
+    // quick and dirty redirect when in production
+    if (location.protocol != 'https:' && location.hostname == "wsb.hsauers.net")
     {
         location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
@@ -78,12 +78,14 @@
             dateCell.appendChild(document.createTextNode(datesList[i]));
             bulls.appendChild(document.createTextNode(bullCount));
             bears.appendChild(document.createTextNode(bearCount));
+            netBulls = netBulls.toFixed(2)
             ratio.appendChild(document.createTextNode(netBulls + "%"));
 
             netBulls /= 100;
 
             if (i < datesList.length - 1) {
-                market.appendChild(document.createTextNode(mktData[datesList[i+1]]*100 + "%"));
+                marketReturn = (mktData[datesList[i+1]]*100).toFixed(2)
+                market.appendChild(document.createTextNode(marketReturn + "%"));
                 chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
                 chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
             } else {

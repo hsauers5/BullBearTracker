@@ -7,8 +7,8 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
     <script type="application/javascript">
-    // quick and dirty redirect
-    if (location.protocol != 'https:')
+    // quick and dirty redirect in production
+    if (location.protocol != 'https:' && location.hostname == "wsb.hsauers.net")
     {
         location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
