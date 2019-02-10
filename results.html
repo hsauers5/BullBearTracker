@@ -89,12 +89,12 @@
                     market.appendChild(document.createTextNode("N/A"));
                 } else {
                     market.appendChild(document.createTextNode(marketReturn + "%"));
+                    chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
+                    chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
                 }
-                chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
-                chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
             } else {
                 market.appendChild(document.createTextNode("N/A"));
-                chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
+                // chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
             }
 
             tr.appendChild(dateCell);
