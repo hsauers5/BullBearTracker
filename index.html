@@ -13,21 +13,16 @@
         location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
     }
 
-    var myip = 0;
-    function getIP(json) {
-        myip = json.ip;
-    }
     </script>
-    <script type="application/javascript" src="https://api.ipify.org?format=jsonp&callback=getIP"></script>
+   
 
     <script>
-        function checkIP() {
-            var ip = myip;
-
+        function has_voted() {
+            
             var hasVoted = false;
 
             // use python api to validate
-            $.post( "/voted" + "?ip=" + ip, function( data ) {
+            $.post( "/voted" , function( data ) {
                 if(data == "True") {
                     hasVoted = true;
                     document.location.href="/results";
@@ -40,7 +35,6 @@
         }
 
         function submit() {
-            var ip = myip;
             var vote = "";
 
             if (document.getElementById("radio-one").checked) {
@@ -50,12 +44,12 @@
             }
 
             // post to python api
-            $.post( "/poll" + "?answer=" + vote + "&ip=" + ip, function( data ) {
+            $.post( "/poll" + "?answer=" + vote , function( data ) {
                 document.location.href="/results";
             });
         }
 
-        checkIP();
+        has_voted();
     </script>
 
     <style>
