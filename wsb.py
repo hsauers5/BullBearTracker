@@ -14,6 +14,13 @@ import csv
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
 
+#Importing file database (TinyDB) 
+from tinydb import TinyDB, Query, where
+import os
+dir_path = os.path.dirname(os.path.realpath(__file__))
+db_path = os.path.join(dir_path,"data.db")
+
+
 log = logging.getLogger('apscheduler.executors.default')
 log.setLevel(logging.INFO)  # DEBUG
 
@@ -59,26 +66,22 @@ def get_results():
 @app.route('/getall', methods=['GET'])
 def get_all_results():
     results = []
+    #query TinyDB instead of CSV file
 
-    csv_name = "voting_data.csv"
-
-    dates = []
-
-    with open(csv_name) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        for row in csv_reader:
-            if not dates.__contains__(row[0]):
-                dates.append(row[0])
-
-    for date in dates:
-        results.append(get_resuts_by_date(date))
-
-    return jsonify({"data": results, "dates": dates})
+    with TinyDB(db_path,'dates') as db:
+        dates = []
+        
+        for i in db.all():
+            results.append(get_resuts_by_date(i["date"]))
+            dates.append(i["date"])
+            
+        return jsonify({"data": results, "dates": dates})
 
 
 @app.route('/voted', methods=['POST', 'GET'])
 def voted():
-    my_ip = request.args['ip']
+    #using real request IP instead
+    my_ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
 
     if has_voted(my_ip):
         return "True"
@@ -89,19 +92,25 @@ def voted():
 @app.route('/poll', methods=['POST', 'GET'])
 def poll():
     vote = request.args['answer']
-    ip = request.args['ip']
-
-    if len(ip) > 15 or len(vote) > 4:
+    #using real request IP instead
+    ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    
+    # no need to check if ip is valid anymore, but stricter vote check
+    if vote not in ["bull","bear"]:
         return status.HTTP_400_BAD_REQUEST
 
     date = get_todays_date()
 
     # ensure client hasn't voted yet
     if not has_voted(ip):
-        # append to csv
-        with open('voting_data.csv', 'a') as fd:
-            fd.write(date + "," + ip + "," + vote + '\n')
-
+        # using db instead of csv
+        with TinyDB(db_path,'voting') as db:
+            # insert vote into database
+            db.insert({"ip":ip,"vote":vote,"date":date})
+            # insert date again into database for future performance in get_all_results
+            db = db.table('dates')
+            if not db.count(where('date') == date):
+                db.insert({"date":date})
     return render_template('results.html')
 
 
@@ -113,47 +122,17 @@ def market():
 
 # checks if vote has been made
 def has_voted(ip):
-
-    csv_name = "voting_data.csv"
-    votes = {}
-
-    with open(csv_name) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-        date = get_todays_date()
-
-        for row in csv_reader:
-            if row[0] in votes:
-                votes[str(row[0])].append(row[1])
-            else:
-                votes[str(row[0])] = [row[1]]
-
-        # print(votes)
-        if date in votes:
-            for my_ip in votes[date]:
-                if my_ip == ip:
-                    return True
-
-        return False
-
+    date = get_todays_date()
+    #check if ip has voted in db, returns int 
+    with TinyDB(db_path,'voting') as db:
+        return db.count((where('date') == date) & (where('ip') == ip))
 
 # gets results by date
 def get_resuts_by_date(date):
-    csv_name = "voting_data.csv"
-
-    with open(csv_name) as csv_file:
-        csv_reader = csv.reader(csv_file, delimiter=',')
-        line_count = 0
-
-        bullCount = 0
-        bearCount = 0
-
-        for row in csv_reader:
-            if row[0] == date:
-                if row[2] == "bull":
-                    bullCount += 1
-                else:
-                    bearCount += 1
+    # using db instead csv and query for totals by specific date
+    with TinyDB(db_path,'voting') as db:
+        bullCount = db.count((where('date') == date) & (where('vote') == "bull"))
+        bearCount = db.count((where('date') == date) & (where('vote') == "bear"))
         return {"date": date, "bullCount": bullCount, "bearCount": bearCount}
 
 
