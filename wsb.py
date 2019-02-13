@@ -6,6 +6,7 @@ from flask import (
     Flask,
     render_template,
     request,
+    redirect,
     jsonify
 )
 from flask_api import status
@@ -41,12 +42,19 @@ def home():
 
     :return:        the rendered template 'home.html'
     """
-    return render_template('index.html')
+    if has_voted(my_ip):
+        return redirect("/results", code=302)
+    else:
+        return render_template('index.html')
 
 
 @app.route('/results')
 def results():
-    return render_template('results.html')
+    my_ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    if has_voted(my_ip):
+        return render_template('results.html')
+    else:
+        return redirect("/", code=302)
 
 
 @app.route('/today', methods=['POST', 'GET'])
