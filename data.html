@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WSB BullBear Tracker</title>
+    <link rel="icon" href="https://ih0.redbubble.net/image.379601684.6062/raf,360x360,075,t,fafafa:ca443f4786.png">
+    <style>
+        #header {
+             font: 24px/1 'Open Sans', sans-serif;
+        }
+        #table {
+             font: 24px/1 'Open Sans', sans-serif;
+        }
+        #wsb_data{
+            font: 24px/1 'Open Sans', sans-serif;
+        }
+
+    </style>
+
+    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.js"></script>
+    <script>
+
+    // quick and dirty redirect when in production
+    if (location.protocol != 'https:' && location.hostname == "wsb.hsauers.net")
+    {
+        location.href = 'https:' + window.location.href.substring(window.location.protocol.length);
+    }
+
+    datesList = null;
+    jsonData = null;
+
+    mktData = null;
+
+    chartPoll = [] // format as [[date, value], []]
+    chartMkt = [] // format as [[date, % change], []]
+
+    // fetch market data here?
+    $.get( "/market" , function( data ) {
+            data = JSON.stringify(data);
+            data = (JSON.parse(data));
+            mktData = data;
+            });
+
+    // fetch all polling data
+    $.get( "/getall" , function( data ) {
+            data = JSON.stringify(data);
+            data = (JSON.parse(data));
+            datesList = data["dates"];
+            jsonData = data["data"];
+            dataLoaded();
+            });
+
+    function dataLoaded() {
+        // alert(datesList[0]);
+        // alert(jsonData[0]["bullCount"]);
+
+        var tbl = document.getElementById('wsb_data');
+        // tbl.style.width = '100%';
+        tbl.setAttribute('border', '1');
+        var tbdy = document.createElement('tbody');
+
+        for (var i = 0; i < datesList.length; i++) {
+
+            var tr = document.createElement('tr');
+
+            var dateCell = document.createElement('td');
+            var bulls = document.createElement('td');
+            var bears = document.createElement('td');
+            var ratio = document.createElement('td');
+            var market = document.createElement('td');
+
+            var bullCount = jsonData[i]["bullCount"];
+            var bearCount = jsonData[i]["bearCount"];
+            var netBulls = 100*(parseFloat(bullCount)-parseFloat(bearCount))/(parseFloat(bearCount)+parseFloat(bullCount));
+
+            dateCell.appendChild(document.createTextNode(datesList[i]));
+            bulls.appendChild(document.createTextNode(bullCount));
+            bears.appendChild(document.createTextNode(bearCount));
+            netBulls = netBulls.toFixed(2)
+            ratio.appendChild(document.createTextNode(netBulls + "%"));
+
+            netBulls /= 100;
+
+            if (i < datesList.length - 1) {
+                marketReturn = (mktData[datesList[i+1]]*100).toFixed(2)
+                if (marketReturn == "NaN") {
+                    market.appendChild(document.createTextNode("N/A"));
+                } else {
+                    market.appendChild(document.createTextNode(marketReturn + "%"));
+                    chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
+                    chartMkt.push({x: new Date(datesList[i]), y:(100*mktData[datesList[i+1]])/100 });
+                }
+            } else {
+                market.appendChild(document.createTextNode("N/A"));
+                // chartPoll.push({x: new Date(datesList[i]), y:(netBulls) });
+            }
+
+            tr.appendChild(dateCell);
+            tr.appendChild(bulls);
+            tr.appendChild(bears);
+            tr.appendChild(ratio);
+            tr.appendChild(market);
+
+            tbdy.appendChild(tr);
+        }
+        tbl.appendChild(tbdy);
+
+        makeChart();
+    }
+
+    function makeChart() {
+        var chart = new CanvasJS.Chart("chartContainer", {
+            title: {
+                text: "WSB vs the Market"
+            },
+            axisX: {
+                valueFormatString: "MMM DD YYYY"
+            },
+            axisY2:[
+                {
+                    title: " % Return",
+                },
+                {
+                    title: " WSB Sentiment",
+                }
+            ],
+            toolTip: {
+                shared: true
+            },
+            legend: {
+                cursor: "pointer",
+                verticalAlign: "top",
+                horizontalAlign: "center",
+                dockInsidePlotArea: true,
+                itemclick: toogleDataSeries
+            },
+            data: [{
+                axisYIndex:1,
+                yValueFormatString: "##.##%",
+                type:"line",
+                axisYType: "secondary",
+                name: "r/WallStreetBets",
+                showInLegend: true,
+                markerSize: 0,
+                dataPoints: chartPoll
+            },
+            {
+                axisYIndex:0,
+                yValueFormatString: "##.##%",
+                type: "line",
+                axisYType: "secondary",
+                name: "S&P 500 Daily % Return",
+                showInLegend: true,
+                markerSize: 0,
+                dataPoints: chartMkt
+            }]
+        });
+        chart.render();
+    }
+
+    function toogleDataSeries(e){
+        if (typeof(e.dataSeries.visible) === "undefined" || e.dataSeries.visible) {
+            e.dataSeries.visible = false;
+        } else{
+            e.dataSeries.visible = true;
+        }
+        chart.render();
+    }
+
+
+    </script>
+</head>
+<body>
+<center>
+
+
+    <div id="header">
+        Results:
+    </div>
+
+    <p>
+    <div id="mytable" style="margin:auto, overflow-x:auto">
+    <table id="wsb_data">
+    <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>Net % Bullish</td><td>Market Return (Following Day)</td></tr>
+    </table>
+    </div>
+    </p>
+
+</center>
+</body>
+</html>
