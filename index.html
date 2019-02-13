@@ -17,23 +17,7 @@
    
 
     <script>
-        function has_voted() {
-            
-            var hasVoted = false;
-
-            // use python api to validate
-            $.post( "/voted" , function( data ) {
-                if(data == "True") {
-                    hasVoted = true;
-                    document.location.href="/results";
-                }
-            });
-
-            if (hasVoted) {
-                document.location.href="/results";
-            }
-        }
-
+       
         function submit() {
             var vote = "";
 
@@ -49,7 +33,6 @@
             });
         }
 
-        has_voted();
     </script>
 
     <style>
