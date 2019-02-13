@@ -3,7 +3,7 @@ from tinydb import TinyDB
 import os, csv
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
-db_path = os.path.join(dir_path,"data3.db")
+db_path = os.path.join(dir_path,"data.db")
 csv_path = os.path.join(dir_path,"voting_data.csv")
 
 def convert():
