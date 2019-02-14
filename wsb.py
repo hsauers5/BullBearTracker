@@ -26,6 +26,7 @@ log.addHandler(h)
 # Create the application instance
 app = Flask(__name__, template_folder="")
 
+
 # Create a URL route in our application for "/"
 @app.route('/')
 def home():
@@ -34,8 +35,7 @@ def home():
     localhost:5000/
     :return:        the rendered template 'home.html'
     """
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
-    print(my_ip)
+    my_ip = get_ip()
     if has_voted(my_ip):
         return redirect("/results", code=302)
     else:
@@ -44,12 +44,12 @@ def home():
 
 @app.route('/results')
 def results():
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
-    print(my_ip)
+    my_ip = get_ip()
     # if has_voted(my_ip):
     return render_template('results.html')
     # else:
     #    return redirect("/", code=302)
+
 
 @app.route('/data')
 def data_page():
@@ -93,7 +93,7 @@ def get_all_results():
 @app.route('/voted', methods=['POST', 'GET'])
 def voted():
     #using real request IP instead
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    my_ip = get_ip()
 
     if has_voted(my_ip):
         return "True"
@@ -184,6 +184,17 @@ def get_market_data():
         for row in csv_reader:
             quotes[row[0]] = row[1]
     return quotes
+
+
+# dynamically gets ip - prevents a 500 being thrown by AWS health checks or on local network
+def get_ip():
+    my_ip = ""
+    if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+        my_ip = str(request.environ['REMOTE_ADDR'])
+    else:
+        my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # if behind a proxy
+    print(my_ip)
+    return my_ip
 
 
 # for job scheduling
