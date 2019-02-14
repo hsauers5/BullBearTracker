@@ -34,7 +34,7 @@ def home():
     localhost:5000/
     :return:        the rendered template 'home.html'
     """
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    my_ip = str(request.headers['X-Real-IP'])
     print(my_ip)
     if has_voted(my_ip):
         return redirect("/results", code=302)
@@ -44,7 +44,7 @@ def home():
 
 @app.route('/results')
 def results():
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    my_ip = str(request.environ['REMOTE_ADDR'])
     if has_voted(my_ip):
         return render_template('results.html')
     else:
@@ -92,7 +92,7 @@ def get_all_results():
 @app.route('/voted', methods=['POST', 'GET'])
 def voted():
     #using real request IP instead
-    my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    my_ip = str(request.environ['REMOTE_ADDR'])
 
     if has_voted(my_ip):
         return "True"
@@ -104,7 +104,7 @@ def voted():
 def poll():
     vote = request.args['answer']
     # using real request IP instead
-    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    ip = str(request.environ['REMOTE_ADDR'])
 
     # no need to check if ip is valid anymore, but stricter vote check
     if vote not in ["bull", "bear"]:
