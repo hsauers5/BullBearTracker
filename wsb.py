@@ -6,6 +6,7 @@ from flask import (
     Flask,
     render_template,
     request,
+    redirect,
     jsonify
 )
 from flask_api import status
@@ -31,15 +32,22 @@ def home():
     """
     This function just responds to the browser ULR
     localhost:5000/
-
     :return:        the rendered template 'home.html'
     """
-    return render_template('index.html')
+    my_ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    if has_voted(my_ip):
+        return redirect("/results", code=302)
+    else:
+        return render_template('index.html')
 
 
 @app.route('/results')
 def results():
-    return render_template('results.html')
+    my_ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
+    if has_voted(my_ip):
+        return render_template('results.html')
+    else:
+        return redirect("/", code=302)
 
 
 @app.route('/today', methods=['POST', 'GET'])
@@ -78,7 +86,8 @@ def get_all_results():
 
 @app.route('/voted', methods=['POST', 'GET'])
 def voted():
-    my_ip = request.args['ip']
+    #using real request IP instead
+    my_ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
 
     if has_voted(my_ip):
         return "True"
@@ -89,18 +98,22 @@ def voted():
 @app.route('/poll', methods=['POST', 'GET'])
 def poll():
     vote = request.args['answer']
+    # using real request IP instead
     ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
 
-    if len(ip) > 15 or len(vote) > 4:
+    # no need to check if ip is valid anymore, but stricter vote check
+    if vote not in ["bull", "bear"]:
         return status.HTTP_400_BAD_REQUEST
 
     date = get_todays_date()
 
     # ensure client hasn't voted yet
     if not has_voted(ip):
-        # append to csv
-        with open('voting_data.csv', 'a') as fd:
-            fd.write(date + "," + ip + "," + vote + '\n')
+        # ensure date is valid - have gotten spam
+        if '/' in date:
+            # append to csv
+            with open('voting_data.csv', 'a') as fd:
+                fd.write(date + "," + ip + "," + vote + '\n')
 
     return render_template('results.html')
 
