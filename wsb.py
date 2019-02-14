@@ -89,7 +89,7 @@ def voted():
 @app.route('/poll', methods=['POST', 'GET'])
 def poll():
     vote = request.args['answer']
-    ip = request.args['ip']
+    ip = str(request.environ.get('HTTP_X_REAL_IP', request.remote_addr))
 
     if len(ip) > 15 or len(vote) > 4:
         return status.HTTP_400_BAD_REQUEST
