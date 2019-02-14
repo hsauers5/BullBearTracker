@@ -46,10 +46,10 @@ def home():
 def results():
     my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
     print(my_ip)
-    if has_voted(my_ip):
-        return render_template('results.html')
-    else:
-        return redirect("/", code=302)
+    # if has_voted(my_ip):
+    return render_template('results.html')
+    # else:
+    #    return redirect("/", code=302)
 
 @app.route('/data')
 def data_page():
