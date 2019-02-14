@@ -314,7 +314,7 @@ def is_logged_in():
 
 
 # reddit callback endpoint
-@app.route('/reddit_callback')
+@app.route('/redditcallback')
 def reddit_callback():
     error = request.args.get('error', '')
     if error:
