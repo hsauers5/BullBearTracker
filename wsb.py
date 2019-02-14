@@ -7,13 +7,15 @@ from flask import (
     render_template,
     request,
     redirect,
-    jsonify
+    jsonify,
+    session
 )
 from flask_api import status
 import datetime, time
 import csv
 from apscheduler.schedulers.background import BackgroundScheduler
 import logging
+import oauth
 
 log = logging.getLogger('apscheduler.executors.default')
 log.setLevel(logging.INFO)  # DEBUG
@@ -26,6 +28,10 @@ log.addHandler(h)
 # Create the application instance
 app = Flask(__name__, template_folder="")
 
+app.secret_key = ""
+with open("secretkey.txt") as creds:
+    app.secret_key = creds.read().replace("\n", '')
+
 
 # Create a URL route in our application for "/"
 @app.route('/')
@@ -35,11 +41,20 @@ def home():
     localhost:5000/
     :return:        the rendered template 'home.html'
     """
-    my_ip = get_ip()
-    if has_voted(my_ip):
-        return redirect("/results", code=302)
+    if is_logged_in():
+        my_ip = get_ip()
+        if has_voted(my_ip):
+            return redirect("/results", code=302)
+        else:
+            return render_template('index.html')
     else:
-        return render_template('index.html')
+        text = '<a href="%s">Authenticate with reddit</a>'
+        return render_template('login.html')
+
+
+@app.route('/getauthurl')
+def get_auth_url():
+    return oauth.make_authorization_url()
 
 
 @app.route('/results')
@@ -92,7 +107,7 @@ def get_all_results():
 
 @app.route('/voted', methods=['POST', 'GET'])
 def voted():
-    #using real request IP instead
+    # using real request IP instead
     my_ip = get_ip()
 
     if has_voted(my_ip):
@@ -105,11 +120,14 @@ def voted():
 def poll():
     vote = request.args['answer']
     # using real request IP instead
-    ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    ip = get_ip()
+
+    if ip == "401":
+        return str(status.HTTP_401_UNAUTHORIZED)
 
     # no need to check if ip is valid anymore, but stricter vote check
     if vote not in ["bull", "bear"]:
-        return status.HTTP_400_BAD_REQUEST
+        return str(status.HTTP_400_BAD_REQUEST)
 
     date = get_todays_date()
 
@@ -188,6 +206,7 @@ def get_market_data():
 
 # dynamically gets ip - prevents a 500 being thrown by AWS health checks or on local network
 def get_ip():
+    """
     my_ip = ""
     if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
         my_ip = str(request.environ['REMOTE_ADDR'])
@@ -195,6 +214,19 @@ def get_ip():
         my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])  # if behind a proxy
     print(my_ip)
     return my_ip
+    """
+    # if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+    #     return str(request.environ['REMOTE_ADDR'])
+    # else:
+    return get_username()
+
+
+# gets username instead of IP
+def get_username():
+    if 'username' in session:
+        return session['username']
+    else:
+        return "401"
 
 
 # for job scheduling
@@ -257,12 +289,46 @@ def job():
                                         run_date=datetime.datetime.now() + datetime.timedelta(days=1, seconds=-0.2))
 
 
+# fetches today's date via external api to avoid server confusion
 def get_todays_date():
     date_url = "http://worldclockapi.com/api/json/est/now"
     contents = json.loads(urllib.request.urlopen(date_url).read())
     date = contents['currentDateTime'][:10]
     date = datetime.datetime.strptime(date, "%Y-%m-%d").strftime("%m/%d/%Y")
     return date
+
+
+# needed for oauth
+@app.route('/homepage')
+def homepage():
+    text = '<a href="%s">Authenticate with reddit</a>'
+    return text % oauth.make_authorization_url()
+
+
+# if user has authenticated
+def is_logged_in():
+    if "username" in session:
+        return True
+    else:
+        return False
+
+
+# reddit callback endpoint
+@app.route('/reddit_callback')
+def reddit_callback():
+    error = request.args.get('error', '')
+    if error:
+        return "Error: " + error
+    state = request.args.get('state', '')
+    if not oauth.is_valid_state(state):
+        # Uh-oh, this request wasn't started by us!
+        return status.HTTP_403_FORBIDDEN
+    code = request.args.get('code')
+    access_token = oauth.get_token(code)
+    # Note: In most cases, you'll want to store the access token, in, say,
+    # a session for use in other parts of your web app.
+    session['username'] = oauth.get_username(access_token)  # set username for session
+    return redirect("/", code=302)  # redirect to main voting page
 
 
 # If we're running in stand alone mode, run the application
