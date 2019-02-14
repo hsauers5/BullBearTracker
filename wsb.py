@@ -35,6 +35,7 @@ def home():
     :return:        the rendered template 'home.html'
     """
     my_ip = str(request.environ['REMOTE_ADDR'])
+    print(my_ip)
     if has_voted(my_ip):
         return redirect("/results", code=302)
     else:
