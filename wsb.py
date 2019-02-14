@@ -47,9 +47,6 @@ def results():
     my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
     print(my_ip)
     # if has_voted(my_ip):
-    if not has_voted(my_ip):
-        return redirect("https://wsb.hsauers.net", code=302)
-
     return render_template('results.html')
     # else:
     #    return redirect("/", code=302)
