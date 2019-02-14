@@ -9,7 +9,7 @@ CLIENT_ID = "6eVUZBWlSNzdnQ"  # Fill this in with your client ID
 CLIENT_SECRET = None  # Fill this in with your client secret
 with open("redditcreds.txt") as creds:
     CLIENT_SECRET = creds.read().replace("\n", '')
-REDIRECT_URI = "https://wsb.hsauers.net/reddit_callback"  # change this in production
+REDIRECT_URI = "https://wsb.hsauers.net/reddit_callback/"  # change this in production
 
 app = wsb.app
 
