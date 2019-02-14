@@ -39,7 +39,7 @@ def make_authorization_url():
               "redirect_uri": REDIRECT_URI,
               "duration": "permanent",
               "scope": "identity"}
-    url = "https://ssl.reddit.com/api/v1/authorize?" + urllib.parse.urlencode(params)
+    url = "https://ssl.reddit.com/api/v1/authorize.compact?" + urllib.parse.urlencode(params)
     return url
 
 
