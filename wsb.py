@@ -45,6 +45,7 @@ def home():
 @app.route('/results')
 def results():
     my_ip = str(request.environ['HTTP_X_FORWARDED_FOR'])
+    print(my_ip)
     if has_voted(my_ip):
         return render_template('results.html')
     else:
