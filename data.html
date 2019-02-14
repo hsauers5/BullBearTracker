@@ -11,7 +11,7 @@
         #table {
              font: 24px/1 'Open Sans', sans-serif;
         }
-        #wsb_data,today-data{
+        #wsb_data{
             font: 24px/1 'Open Sans', sans-serif;
         }
     </style>
@@ -50,12 +50,7 @@
         var tbl = document.getElementById('wsb_data');
         // tbl.style.width = '100%';
         tbl.setAttribute('border', '1');
-        var tbdy = document.getElementById('tbody');
-
-        var todayBulls = 0;
-        var todayBears = 0;
-        var todayNet = 0;
-
+        var tbdy = document.createElement('tbody');
         for (var i = 0; i < datesList.length; i++) {
             var tr = document.createElement('tr');
             var dateCell = document.createElement('td');
@@ -89,33 +84,10 @@
             tr.appendChild(bulls);
             tr.appendChild(bears);
             tr.appendChild(ratio);
-
-            todayBulls = bullCount;
-            todayBears = bearCount;
-            todayNet = netBulls;
-
             tr.appendChild(market);
             tbdy.appendChild(tr);
         }
         tbl.appendChild(tbdy);
-
-        var tbdtdy = document.getElementById("tbody-today");
-        var blank = document.createElement('td');
-        var bulls = document.createElement('td');
-        var bears = document.createElement('td');
-        var ratio = document.createElement('td');
-
-        bulls.appendChild(document.createTextNode(todayBulls));
-        bears.appendChild(document.createTextNode(todayBears));
-        ratio.appendChild(document.createTextNode(todayNet + "%"));
-
-        var tr = document.createElement('tr');
-        tr.appendChild(blank);
-        tr.appendChild(bulls);
-        tr.appendChild(bears);
-        tr.appendChild(ratio);
-        tbdtdy.appendChild(tr);
-
         makeChart();
     }
     function makeChart() {
@@ -180,30 +152,17 @@
 <body>
 <center>
 
+
+    <div id="header">
+        Results:
+    </div>
+
     <p>
-    <div id="mytable" style="margin:auto, overflow-x:auto, display:none">
-    <table id="wsb_data" style="display:none">
-        <tbody id="tbody" style="display:none">
+    <div id="mytable" style="margin:auto, overflow-x:auto">
+    <table id="wsb_data">
     <tr><td>Date</td><td>Bulls</td><td>Bears</td><td>Net % Bullish</td><td>Market Return (Following Day)</td></tr>
-        </tbody>
     </table>
     </div>
-    </p>
-
-    <p>
-
-    <div id="todaytable" style="margin:auto, overflow-x:auto">
-        <table id="today-data">
-            <tbody id="tbody-today" style="display:none">
-               <tr><td>Today: </td><td>Bulls</td><td>Bears</td><td>Net % Bullish</td></tr>
-            </tbody>
-        </table>
-    </div>
-    </p>
-
-    <p>
-    <div id="chartContainer" style="height: 50%; width: 75%;"></div>
-    <script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
     </p>
 
 </center>

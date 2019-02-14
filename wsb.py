@@ -49,6 +49,10 @@ def results():
     else:
         return redirect("/", code=302)
 
+@app.route('/data')
+def data_page():
+    return render_template("data.html")
+
 
 @app.route('/today', methods=['POST', 'GET'])
 def today():
